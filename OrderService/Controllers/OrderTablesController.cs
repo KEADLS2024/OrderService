@@ -23,10 +23,6 @@ namespace OrderService.Controllers
         {
             var orders = await _orderTablesManager.GetAllOrdersAsync();
 
-            if (orders == null)
-            {
-                return NotFound();
-            }
 
             return Ok(orders);
         }

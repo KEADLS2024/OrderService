@@ -39,11 +39,11 @@ builder.Services.AddScoped<IOrderItems, OrderItemsManager>(provider =>
     )
 );
 
-//builder.Services.AddScoped<OrderTablesManager>();
-//builder.Services.AddScoped<OrderItemsManager>();
+builder.Services.AddScoped<OrderTablesManager>();
+builder.Services.AddScoped<OrderItemsManager>();
 
-//builder.Services.AddScoped<IOrderTables, OrderTablesManager>();
-//builder.Services.AddScoped<IOrderItems, OrderItemsManager>();
+builder.Services.AddScoped<IOrderTables, OrderTablesManager>();
+builder.Services.AddScoped<IOrderItems, OrderItemsManager>();
 
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

@@ -19,7 +19,7 @@ public class OrderItemsManager : IOrderItems
         _channel = connection.CreateModel(); // Create a channel per instance, or manage lifecycle elsewhere
 
         // Ensure the queue exists when the manager is instantiated
-        _channel.QueueDeclare(queue: "orderitems",
+        _channel.QueueDeclare(queue: "orderItems",
             durable: true,
             exclusive: false,
             autoDelete: false,
@@ -40,7 +40,7 @@ public class OrderItemsManager : IOrderItems
         var body = Encoding.UTF8.GetBytes(messageString);
 
         _channel.BasicPublish(exchange: "",
-            routingKey: "orderitems",
+            routingKey: "orderItems",
             basicProperties: null,
             body: body);
     }

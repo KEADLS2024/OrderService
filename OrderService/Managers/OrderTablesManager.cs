@@ -1,17 +1,48 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Text;
+using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using OrderService.Data;
 using OrderService.Interfaces;
 using OrderService.Models;
+using RabbitMQ.Client;
 
 namespace OrderService.Managers;
 
 public class OrderTablesManager : IOrderTables
 {
     private readonly MyDbContext _context;
+    private readonly IModel _channel;
 
-    public OrderTablesManager(MyDbContext context)
+    public OrderTablesManager(MyDbContext context, IConnection connection)
     {
         _context = context;
+        _channel = connection.CreateModel(); // Create a channel per instance, or manage lifecycle elsewhere
+
+        // Ensure the queue exists when the manager is instantiated
+        _channel.QueueDeclare(queue: "orders",
+            durable: true,
+            exclusive: false,
+            autoDelete: false,
+            arguments: null);
+    }
+
+    private void PublishOrderMessage(OrderTable order, string action)
+    {
+        var messageObject = new
+        {
+            OrderId = order.OrderId,
+            TotalAmount = order.TotalAmount,
+            CustomerId = order.CustomerId,
+            Action = action  // "Added" or "Updated"
+        };
+
+        var messageString = JsonSerializer.Serialize(messageObject);
+        var body = Encoding.UTF8.GetBytes(messageString);
+
+        _channel.BasicPublish(exchange: "",
+            routingKey: "orders",
+            basicProperties: null,
+            body: body);
     }
 
     public async Task<IEnumerable<OrderTable>> GetAllOrdersAsync()
@@ -28,12 +59,14 @@ public class OrderTablesManager : IOrderTables
     {
         _context.OrderTables.Add(order);
         await _context.SaveChangesAsync();
+        PublishOrderMessage(order, "Added");
     }
 
     public async Task UpdateOrderAsync(OrderTable order)
     {
         _context.Entry(order).State = EntityState.Modified;
         await _context.SaveChangesAsync();
+        PublishOrderMessage(order, "Updated");
     }
 
     public async Task DeleteOrderAsync(int orderId)

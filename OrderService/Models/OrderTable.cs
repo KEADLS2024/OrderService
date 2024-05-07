@@ -27,6 +27,6 @@ public class OrderTable
     [ForeignKey("DeliveryAddress")]
     public int DeliveryAddressId { get; set; }
 
-    public ICollection<OrderItem> OrderItems { get; set; } // An Order can have many OrderItems.
+    //public ICollection<OrderItem> OrderItems { get; set; } // An Order can have many OrderItems.
 
 }

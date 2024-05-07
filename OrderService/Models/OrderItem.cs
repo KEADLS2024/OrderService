@@ -22,7 +22,7 @@ public class OrderItem
     [Range(1, int.MaxValue, ErrorMessage = "Order ID must be a positive number.")]
     [ForeignKey("OrderTable")]
     public int OrderId { get; set; }
-    public virtual OrderTable OrderTable { get; set; }
+    //public virtual OrderTable OrderTable { get; set; }
 
     [Required(ErrorMessage = "Product ID is required.")]
     [Range(1, int.MaxValue, ErrorMessage = "Product ID must be a positive number.")]

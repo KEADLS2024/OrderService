@@ -29,8 +29,21 @@ services:
       - ConnectionStrings__DefaultConnection=Server=orderservice-db-1;Database=OrderServiceDB;User=sa;Password=Qwerty123!;TrustServerCertificate=True;
     networks:
       - app-network
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+    ports:
+      - "5672:5672"     
+      - "15672:15672"   
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - app-network
 volumes:
   db_data:
+  rabbitmq_data:
 
 networks:
   app-network:

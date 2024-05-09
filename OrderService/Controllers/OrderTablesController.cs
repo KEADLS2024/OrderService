@@ -27,6 +27,15 @@ namespace OrderService.Controllers
             return Ok(orders);
         }
 
+        [HttpGet("deleted")]
+        public async Task<ActionResult<IEnumerable<OrderTable>>> GetDeletedOrders()
+        {
+            var orders = await _orderTablesManager.GetAllDeletedOrdersAsync();
+
+
+            return Ok(orders);
+        }
+
         // GET: api/OrderTables/5
         [HttpGet("{id}")]
         public async Task<ActionResult<OrderTable>> GetOrderTable(int id)

@@ -28,4 +28,6 @@ public class OrderItem
     [Range(1, int.MaxValue, ErrorMessage = "Product ID must be a positive number.")]
     [ForeignKey("Product")]
     public int ProductId { get; set; }
+
+    public DateTime? DeletedAt { get; set; }
 }

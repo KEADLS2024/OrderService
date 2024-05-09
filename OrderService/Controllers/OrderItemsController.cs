@@ -31,6 +31,19 @@ namespace OrderService.Controllers
             return Ok(orderItems);
         }
 
+        [HttpGet("deleted")]
+        public async Task<ActionResult<IEnumerable<OrderItem>>> GetDeletedOrderItems()
+        {
+            var orderItems = await _orderItemsManager.GetAllDeletedOrderItemsAsync();
+
+            if (orderItems == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(orderItems);
+        }
+
         // GET: api/OrderItems/5
         [HttpGet("{id}")]
         public async Task<ActionResult<OrderItem>> GetOrderItem(int id)

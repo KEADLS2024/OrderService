@@ -47,12 +47,17 @@ public class OrderTablesManager : IOrderTables
 
     public async Task<IEnumerable<OrderTable>> GetAllOrdersAsync()
     {
+        return await _context.OrderTables.Where(o => o.DeletedAt == null).ToListAsync();
+    }
+
+    public async Task<IEnumerable<OrderTable>> GetAllDeletedOrdersAsync()
+    {
         return await _context.OrderTables.ToListAsync();
     }
 
     public async Task<OrderTable> GetOrderByIdAsync(int orderId)
     {
-        return await _context.OrderTables.FindAsync(orderId);
+        return await _context.OrderTables.FirstOrDefaultAsync(o => o.OrderId == orderId && o.DeletedAt == null);
     }
 
     public async Task AddOrderAsync(OrderTable order)
@@ -64,31 +69,41 @@ public class OrderTablesManager : IOrderTables
 
     public async Task UpdateOrderAsync(OrderTable order)
     {
-        _context.Entry(order).State = EntityState.Modified;
-        await _context.SaveChangesAsync();
-        PublishOrderMessage(order, "Updated");
+        if (order.DeletedAt == null)
+        {
+            _context.Entry(order).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            PublishOrderMessage(order, "Updated");
+        }
     }
 
     public async Task DeleteOrderAsync(int orderId)
     {
-        var order = await _context.OrderTables.FindAsync(orderId);
+        var order = await GetOrderByIdAsync(orderId);
         if (order != null)
         {
-            _context.OrderTables.Remove(order);
+            order.DeletedAt = DateTime.Now;
+            _context.Entry(order).State = EntityState.Modified;
             await _context.SaveChangesAsync();
+            PublishOrderMessage(order, "Deleted");
         }
     }
 
     public async Task<IEnumerable<OrderTable>> GetOrdersByCustomerAndDateAsync(int customerId, DateTime start, DateTime end)
     {
         return await _context.OrderTables
-            .Where(o => o.CustomerId == customerId && o.OrderDate >= start && o.OrderDate <= end)
+            .Where(o => o.CustomerId == customerId && o.OrderDate >= start && o.OrderDate <= end && o.DeletedAt == null)
             .ToListAsync();
     }
 
     public async Task DeleteOrderAsync(OrderTable order)
     {
-        _context.OrderTables.Remove(order);
-        await _context.SaveChangesAsync();
+        if (order != null)
+        {
+            order.DeletedAt = DateTime.Now;
+            _context.Entry(order).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            PublishOrderMessage(order, "Deleted");
+        }
     }
 }

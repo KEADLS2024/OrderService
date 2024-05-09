@@ -47,12 +47,16 @@ public class OrderItemsManager : IOrderItems
 
     public async Task<IEnumerable<OrderItem>> GetAllOrderItemsAsync()
     {
+        return await _context.OrderItems.Where(o => o.DeletedAt == null).ToListAsync();
+    }
+    public async Task<IEnumerable<OrderItem>> GetAllDeletedOrderItemsAsync()
+    {
         return await _context.OrderItems.ToListAsync();
     }
 
     public async Task<OrderItem> GetOrderItemByIdAsync(int orderItemId)
     {
-        return await _context.OrderItems.FindAsync(orderItemId);
+        return await _context.OrderItems.FirstOrDefaultAsync(o => o.OrderItemId == orderItemId && o.DeletedAt == null);
     }
 
     public async Task AddOrderItemAsync(OrderItem orderItem)
@@ -63,18 +67,24 @@ public class OrderItemsManager : IOrderItems
 
     public async Task UpdateOrderItemAsync(OrderItem orderItem)
     {
-        _context.Entry(orderItem).State = EntityState.Modified;
-        await _context.SaveChangesAsync();
-        PublishOrderMessage(orderItem, "Updated");
+        if (orderItem.DeletedAt == null)
+        {
+            _context.Entry(orderItem).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            PublishOrderMessage(orderItem, "Updated");
+        }
+           
     }
 
     public async Task DeleteOrderItemAsync(int orderItemId)
     {
-        var orderItem = await _context.OrderItems.FindAsync(orderItemId);
+        var orderItem = await GetOrderItemByIdAsync(orderItemId);
         if (orderItem != null)
         {
-            _context.OrderItems.Remove(orderItem);
+            orderItem.DeletedAt = DateTime.Now;
+            _context.Entry(orderItem).State = EntityState.Modified;
             await _context.SaveChangesAsync();
+            PublishOrderMessage(orderItem, "Deleted");
         }
     }
 }

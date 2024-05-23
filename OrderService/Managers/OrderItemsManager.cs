@@ -30,9 +30,9 @@ public class OrderItemsManager : IOrderItems
     {
         var messageObject = new
         {
-            OrderId = order.OrderItemId,
-            TotalAmount = order.Price,
-            CustomerId = order.Quantity,
+            OrderItemId = order.OrderItemId,
+            Price = order.Price,
+            Quantity = order.Quantity,
             Action = action  // "Added" or "Updated"
         };
 
